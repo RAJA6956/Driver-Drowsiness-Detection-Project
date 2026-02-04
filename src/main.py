@@ -2,11 +2,11 @@ import cv2
 from face_detection import FaceDetector
 from landmark_detection import FaceLandmarkDetector
 from landmark_utils import LEFT_EYE, RIGHT_EYE, MOUTH
+from feature_extraction import eye_aspect_ratio, mouth_aspect_ratio
 
 
-def draw_points(frame, points):
-    for (x, y) in points:
-        cv2.circle(frame, (x, y), 2, (0, 255, 0), -1)
+EAR_THRESHOLD = 0.25
+MAR_THRESHOLD = 0.7
 
 
 def main():
@@ -19,18 +19,31 @@ def main():
         if not ret:
             break
 
-        faces = face_detector.detect_faces(frame)
         landmarks = landmark_detector.detect_landmarks(frame)
 
         if landmarks:
-            draw_points(frame, [landmarks[i] for i in LEFT_EYE])
-            draw_points(frame, [landmarks[i] for i in RIGHT_EYE])
-            draw_points(frame, [landmarks[i] for i in MOUTH])
+            left_eye = [landmarks[i] for i in LEFT_EYE]
+            right_eye = [landmarks[i] for i in RIGHT_EYE]
+            mouth = [landmarks[i] for i in MOUTH]
 
-        for (x, y, w, h) in faces:
-            cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
+            ear = (eye_aspect_ratio(left_eye) + eye_aspect_ratio(right_eye)) / 2
+            mar = mouth_aspect_ratio(mouth)
 
-        cv2.imshow("Landmarks - Eyes & Mouth (Q to exit)", frame)
+            cv2.putText(frame, f"EAR: {ear:.2f}", (30, 30),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+
+            cv2.putText(frame, f"MAR: {mar:.2f}", (30, 60),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2)
+
+            if ear < EAR_THRESHOLD:
+                cv2.putText(frame, "DROWSY EYES!", (200, 30),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 255), 3)
+
+            if mar > MAR_THRESHOLD:
+                cv2.putText(frame, "YAWNING!", (200, 70),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 255), 3)
+
+        cv2.imshow("Drowsiness Signals (Q to exit)", frame)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
