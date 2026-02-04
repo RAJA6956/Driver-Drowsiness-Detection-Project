@@ -1,9 +1,9 @@
 import cv2
-from face_detection import FaceDetector
 from landmark_detection import FaceLandmarkDetector
 from landmark_utils import LEFT_EYE, RIGHT_EYE, MOUTH
 from feature_extraction import eye_aspect_ratio, mouth_aspect_ratio
 from temporal_logic import DrowsinessMonitor
+from alert_system import AlertSystem
 
 
 MAR_THRESHOLD = 0.7
@@ -13,6 +13,7 @@ def main():
     cap = cv2.VideoCapture(0)
     landmark_detector = FaceLandmarkDetector()
     monitor = DrowsinessMonitor()
+    alert = AlertSystem()
 
     while True:
         ret, frame = cap.read()
@@ -38,14 +39,15 @@ def main():
                         cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2)
 
             if state == "DROWSY":
-                cv2.putText(frame, "DROWSINESS ALERT!", (150, 100),
+                cv2.putText(frame, "DROWSINESS ALERT!", (120, 100),
                             cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255), 3)
+                alert.trigger_alert()
 
             if mar > MAR_THRESHOLD:
-                cv2.putText(frame, "YAWNING", (150, 140),
+                cv2.putText(frame, "YAWNING", (120, 140),
                             cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255), 3)
 
-        cv2.imshow("Temporal Drowsiness Detection (Q to exit)", frame)
+        cv2.imshow("Drowsiness Detection with Alerts (Q to exit)", frame)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
@@ -56,4 +58,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
