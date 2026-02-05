@@ -1,34 +1,30 @@
-from collections import deque
-import time
+class TemporalLogic:
+    def __init__(self, ear_thresh=0.25, mar_thresh=0.7, consec_frames=20):
+        self.ear_thresh = ear_thresh
+        self.mar_thresh = mar_thresh
+        self.consec_frames = consec_frames
 
-
-class DrowsinessMonitor:
-    def __init__(self, ear_threshold=0.25, frames_threshold=20):
-        self.ear_threshold = ear_threshold
-        self.frames_threshold = frames_threshold
-
-        self.counter = 0
+        self.eye_counter = 0
+        self.yawn_counter = 0
         self.drowsy = False
 
-        self.blink_count = 0
-        self.eye_closed = False
-
-    def update(self, ear):
-        status = "ALERT"
-
-        if ear < self.ear_threshold:
-            self.counter += 1
-
-            if not self.eye_closed:
-                self.eye_closed = True
-                self.blink_count += 1
-
-            if self.counter >= self.frames_threshold:
-                self.drowsy = True
-                status = "DROWSY"
+    def update(self, ear, mar):
+        # Eye closure logic
+        if ear < self.ear_thresh:
+            self.eye_counter += 1
         else:
-            self.counter = 0
-            self.eye_closed = False
+            self.eye_counter = 0
+
+        # Yawn logic
+        if mar > self.mar_thresh:
+            self.yawn_counter += 1
+        else:
+            self.yawn_counter = 0
+
+        # Final decision
+        if self.eye_counter >= self.consec_frames or self.yawn_counter >= self.consec_frames:
+            self.drowsy = True
+        else:
             self.drowsy = False
 
-        return status
+        return self.drowsy
