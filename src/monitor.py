@@ -1,22 +1,35 @@
-import cv2
+# src/monitor.py
 
-cap = cv2.VideoCapture(0)
+class DrowsinessMonitor:
+    """
+    Tracks EAR/MAR over time and determines driver state.
+    """
 
-if not cap.isOpened():
-    print("Camera NOT opened")
-    exit()
+    def __init__(
+        self,
+        ear_threshold=0.25,
+        mar_threshold=0.6,
+        drowsy_frames=20
+    ):
+        self.ear_threshold = ear_threshold
+        self.mar_threshold = mar_threshold
+        self.drowsy_frames = drowsy_frames
 
-print("Camera opened successfully")
+        self.closed_eye_frames = 0
+        self.blink_count = 0
+        self.state = "AWAKE"
 
-while True:
-    ret, frame = cap.read()
-    if not ret:
-        break
+    def update(self, ear, mar):
+        if ear < self.ear_threshold:
+            self.closed_eye_frames += 1
+        else:
+            if self.closed_eye_frames > 2:
+                self.blink_count += 1
+            self.closed_eye_frames = 0
 
-    cv2.imshow("TEST CAMERA", frame)
+        if self.closed_eye_frames >= self.drowsy_frames or mar > self.mar_threshold:
+            self.state = "DROWSY"
+        else:
+            self.state = "AWAKE"
 
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-
-cap.release()
-cv2.destroyAllWindows()
+        return self.state

@@ -23,10 +23,12 @@ def main():
     from face_detection import FaceDetector
     from landmark_detection import LandmarkDetector
     from feature_extraction import FeatureExtractor
+    from alert_system import AlertSystem
 
     face_detector = FaceDetector()
     landmark_detector = LandmarkDetector()
     feature_extractor = FeatureExtractor()
+    alert = AlertSystem()
 
     print("🟢 Modules initialized")
     print("🟢 Entering main loop")
@@ -73,49 +75,23 @@ def main():
 
                 if ear_counter >= DROWSY_FRAMES:
                     state = "DROWSY"
+                    alert.play()   # 🔊 SAFE AUDIO TRIGGER
 
                 # =========================
                 # VISUAL DEBUG
                 # =========================
-                cv2.putText(
-                    frame,
-                    f"EAR: {ear:.2f}",
-                    (30, 40),
-                    cv2.FONT_HERSHEY_SIMPLEX,
-                    0.7,
-                    (0, 255, 0),
-                    2,
-                )
+                cv2.putText(frame, f"EAR: {ear:.2f}", (30, 40),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
 
-                cv2.putText(
-                    frame,
-                    f"MAR: {mar:.2f}",
-                    (30, 75),
-                    cv2.FONT_HERSHEY_SIMPLEX,
-                    0.7,
-                    (255, 0, 0),
-                    2,
-                )
+                cv2.putText(frame, f"MAR: {mar:.2f}", (30, 75),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 0, 0), 2)
 
-                cv2.putText(
-                    frame,
-                    f"Blinks: {blink_count}",
-                    (30, 110),
-                    cv2.FONT_HERSHEY_SIMPLEX,
-                    0.7,
-                    (255, 255, 0),
-                    2,
-                )
+                cv2.putText(frame, f"Blinks: {blink_count}", (30, 110),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2)
 
-                cv2.putText(
-                    frame,
-                    f"State: {state}",
-                    (30, 145),
-                    cv2.FONT_HERSHEY_SIMPLEX,
-                    0.8,
-                    (0, 0, 255) if state == "DROWSY" else (0, 255, 0),
-                    2,
-                )
+                cv2.putText(frame, f"State: {state}", (30, 145),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.8,
+                            (0, 0, 255) if state == "DROWSY" else (0, 255, 0), 2)
 
         cv2.imshow("Driver Drowsiness Detection", frame)
 
@@ -130,4 +106,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
