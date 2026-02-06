@@ -34,7 +34,7 @@ def main():
     print("🟢 Entering main loop")
 
     # =========================
-    # TEMPORAL LOGIC VARIABLES
+    # EAR (EYES) LOGIC
     # =========================
     EAR_THRESHOLD = 0.23
     BLINK_FRAMES = 3
@@ -42,7 +42,22 @@ def main():
 
     ear_counter = 0
     blink_count = 0
-    state = "ALERT"
+    drowsy_state = "ALERT"
+
+    # =========================
+    # MAR (YAWN) LOGIC
+    # =========================
+    MAR_THRESHOLD = 0.40
+    YAWN_FRAMES = 15
+
+    mar_counter = 0
+    yawn_count = 0
+    yawning = False
+
+    # =========================
+    # FATIGUE SCORE (SAFE)
+    # =========================
+    fatigue_score = 0.0  # 0 → fresh, 100 → exhausted
 
     while True:
         ret, frame = cap.read()
@@ -63,22 +78,48 @@ def main():
                 mar = feature_extractor.compute_mar(landmarks)
 
                 # =========================
-                # TEMPORAL LOGIC
+                # EAR TEMPORAL LOGIC
                 # =========================
                 if ear < EAR_THRESHOLD:
                     ear_counter += 1
                 else:
                     if ear_counter >= BLINK_FRAMES:
                         blink_count += 1
+                        fatigue_score += 0.05  # small blink contribution
                     ear_counter = 0
-                    state = "ALERT"
+                    drowsy_state = "ALERT"
 
                 if ear_counter >= DROWSY_FRAMES:
-                    state = "DROWSY"
-                    alert.play()   # 🔊 SAFE AUDIO TRIGGER
+                    drowsy_state = "DROWSY"
+                    alert.play()
+                    fatigue_score += 0.8  # strong fatigue signal
 
                 # =========================
-                # VISUAL DEBUG
+                # MAR TEMPORAL LOGIC (YAWN)
+                # =========================
+                if mar > MAR_THRESHOLD:
+                    mar_counter += 1
+                else:
+                    if mar_counter >= YAWN_FRAMES:
+                        yawn_count += 1
+                        fatigue_score += 0.5  # moderate contribution
+                    mar_counter = 0
+                    yawning = False
+
+                if mar_counter >= YAWN_FRAMES:
+                    yawning = True
+
+                # =========================
+                # FATIGUE RECOVERY (VERY SLOW)
+                # =========================
+                if drowsy_state == "ALERT" and not yawning:
+                    fatigue_score -= 0.1
+
+                # Clamp score
+                fatigue_score = max(0.0, min(100.0, fatigue_score))
+
+                # =========================
+                # VISUAL OVERLAY
                 # =========================
                 cv2.putText(frame, f"EAR: {ear:.2f}", (30, 40),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
@@ -89,9 +130,46 @@ def main():
                 cv2.putText(frame, f"Blinks: {blink_count}", (30, 110),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2)
 
-                cv2.putText(frame, f"State: {state}", (30, 145),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.8,
-                            (0, 0, 255) if state == "DROWSY" else (0, 255, 0), 2)
+                cv2.putText(frame, f"Yawns: {yawn_count}", (30, 145),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 165, 0), 2)
+
+                cv2.putText(
+                    frame,
+                    f"State: {drowsy_state}",
+                    (30, 180),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.8,
+                    (0, 0, 255) if drowsy_state == "DROWSY" else (0, 255, 0),
+                    2,
+                )
+
+                # Fatigue color scale
+                fatigue_color = (
+                    (0, 255, 0) if fatigue_score < 30 else
+                    (0, 255, 255) if fatigue_score < 60 else
+                    (0, 0, 255)
+                )
+
+                cv2.putText(
+                    frame,
+                    f"Fatigue: {int(fatigue_score)}%",
+                    (30, 215),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.8,
+                    fatigue_color,
+                    2,
+                )
+
+                if yawning:
+                    cv2.putText(
+                        frame,
+                        "YAWNING",
+                        (250, 40),
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        0.9,
+                        (0, 0, 255),
+                        3,
+                    )
 
         cv2.imshow("Driver Drowsiness Detection", frame)
 
@@ -106,3 +184,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+

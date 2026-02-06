@@ -1,14 +1,14 @@
-# Virtual environment
+# Virtual environments
 venv/
+venv38/
 
-# Python cache
+# Logs
+logs/
+
+# OS files
 __pycache__/
 *.pyc
 
-# OS files
-.DS_Store
-Thumbs.db
-.env
-# IDE
-.vscode/
-.idea/
+# Test files
+test_opencv_window.py
+
