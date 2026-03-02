@@ -1,6 +1,6 @@
 
 
-**🚗 Driver Drowsiness Detection System**
+**Driver Drowsiness Detection System**
 
 
 
@@ -10,7 +10,7 @@ The system detects blinks, yawns, and drowsy behavior, logs session data, and en
 
 
 
-**📌 Features**
+** Features**
 
 
 
@@ -46,7 +46,7 @@ Post-session fatigue timeline visualization
 
 
 
-**🧠 System Overview**
+** System Overview**
 
 
 
@@ -98,7 +98,7 @@ This design avoids heavy ML models and is suitable for edge or embedded systems.
 
 
 
-**📊 Metrics Used**
+** Metrics Used**
 
 Eye Aspect Ratio (EAR)
 
@@ -170,7 +170,7 @@ Driver-Drowsiness-Detection-Project/
 
 
 
-**⚙️ Installation**
+** Installation**
 
 
 
@@ -194,7 +194,7 @@ pip install -r requirements.txt
 
 
 
-**▶️ Usage**
+**Usage**
 
 Run real-time detection
 
@@ -232,7 +232,7 @@ EAR and MAR trends
 
 
 
-**🧪 Data Logging**
+** Data Logging**
 
 
 
@@ -268,7 +268,7 @@ The CSV enables offline analysis and visualization without affecting real-time p
 
 
 
-**🚀 Why Rule-Based (Not ML)?**
+** Why Rule-Based (Not ML)?**
 
 
 
@@ -312,7 +312,7 @@ Embedded deployment (Raspberry Pi)
 
 
 
-**👨‍💻 Author**
+** Author**
 
 
 
